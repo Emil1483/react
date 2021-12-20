@@ -4,6 +4,7 @@ const playersDiv = document.getElementById('players')
 const buttonDiv = document.getElementById('button')
 const chairButton = document.getElementById('chair')
 const gameStateParagraph = document.getElementById('game-state')
+const registeredNameParagraph = document.getElementById('registered-name')
 
 const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:1881/' : 'https://chair-game-api.djupvik.dev/';
 
@@ -12,14 +13,17 @@ let registeredName = null
 let players = []
 let reactionStart = null
 let reactionResult = null
+let started = false
 
 const show = (element) => element.style.display = 'block'
 const hide = (element) => element.style.display = 'none'
 
 function updateHtml() {
-    gameStateParagraph.innerHTML = reactionStart ? 'Game has started' : 'waiting for players...'
+    registeredNameParagraph.innerHTML = registeredName ? `Your Name: ${registeredName}` : ''
 
-    registeredName || reactionStart ? hide(registerNameDiv) : show(registerNameDiv)
+    gameStateParagraph.innerHTML = started ? 'Game has started' : 'waiting for players...'
+
+    registeredName || started ? hide(registerNameDiv) : show(registerNameDiv)
 
     playersDiv.innerHTML = ''
     players.forEach((player) => {
@@ -29,7 +33,12 @@ function updateHtml() {
     })
 
     registeredName && reactionStart ? show(buttonDiv) : hide(buttonDiv)
-    chairButton.innerHTML = reactionStart > Date.now() ? 'wait for green' : 'click'
+
+    if (reactionResult) {
+        chairButton.innerHTML = reactionResult > 0 ? Math.round(reactionResult) : 'too early!'
+    } else {
+        chairButton.innerHTML = reactionStart > Date.now() ? 'wait for green' : 'click'
+    }
 }
 
 async function register() {
@@ -49,12 +58,11 @@ async function register() {
     })
 
     if (result.status != 200) {
-        alert(result.text())
+        alert(await result.text())
         return
     }
 
     registeredName = name
-
 
     updateGameState()
 }
@@ -74,7 +82,7 @@ async function chair() {
     })
 
     if (result.status != 200) {
-        alert(result.text())
+        alert(await result.text())
         return
     }
 
@@ -86,14 +94,25 @@ async function updateGameState() {
     const result = await fetch(API_URL + 'game?=' + new Date().getTime())
 
     if (result.status != 200) {
-        alert(result.text())
+        alert(await result.text())
         return
     }
 
     const json = await result.json()
-    players = json.players
 
-    if (reactionStart != json.reactionStart) {
+    if (players.includes(registeredName) && !json.players.includes(registeredName)) {
+        alert('You were eliminated lmao!')
+    }
+
+    players = json.players
+    started = json.started
+
+    if (players.length == 0) registeredName = null
+
+    if (json.reactionStart == null) {
+        reactionStart = null
+        reactionResult = null
+    } else if (reactionStart != json.reactionStart) {
         reactionStart = json.reactionStart
         const delay = reactionStart - Date.now()
         const sleep = new Promise(resolve => setTimeout(resolve, delay))

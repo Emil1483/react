@@ -14,13 +14,11 @@ app.use(express.json())
 const port = process.env.PORT || 1881
 
 const players = {}
-
 let reactionStart = null
-
-let gameHasStarted = () => reactionStart != null
+let started = false
 
 app.post('/register', (req, res) => {
-    if (gameHasStarted()) {
+    if (started) {
         res.status(400).send('game has already started')
         return
     }
@@ -43,7 +41,7 @@ app.post('/register', (req, res) => {
 })
 
 app.post('/results', (req, res) => {
-    if (!gameHasStarted()) {
+    if (!started) {
         res.status(400).send('the game has not started yet')
         return
     }
@@ -66,6 +64,7 @@ app.post('/results', (req, res) => {
     }
 
     if (reaction < 0) {
+        delete players[name]
         res.status(200).send('you have been eliminated because you clicked too early')
         return
     }
@@ -76,6 +75,8 @@ app.post('/results', (req, res) => {
     if (notDonePlayers.length == 0) {
         const worstPlayer = Object.keys(players).reduce((a, b) => players[a] > players[b] ? a : b)
         delete players[worstPlayer]
+
+        reactionStart = null
     }
 
     res.status(200).send('😁')
@@ -86,17 +87,30 @@ app.get('/game', (_, res) => {
         {
             players: Object.keys(players),
             reactionStart: reactionStart,
+            started: started,
         }
     )
 })
 
 app.post('/start', (_, res) => {
+    if (Object.keys(players).length < 2) {
+        res.status(400).send('there must be at least two players')
+        return
+    }
+
+    started = true
+
+    for (const player in players) {
+        players[player] = null
+    }
+
     reactionStart = Date.now() + 1000 * 5 + Math.random() * 1000 * 5
     res.status(200).send(reactionStart.toString())
 })
 
 app.post('/clear', (_, res) => {
     reactionStart = null
+    started = false
     for (const name in players) {
         delete players[name]
     }
