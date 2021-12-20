@@ -36,8 +36,10 @@ function updateHtml() {
 
     if (reactionResult) {
         chairButton.innerHTML = reactionResult > 0 ? Math.round(reactionResult) : 'too early!'
+        chairButton.className = reactionResult > 0 ? 'blue' : 'red'
     } else {
         chairButton.innerHTML = reactionStart > Date.now() ? 'wait for green' : 'click'
+        chairButton.className = reactionStart > Date.now() ? null : 'green'
     }
 }
 
@@ -100,7 +102,7 @@ async function updateGameState() {
 
     const json = await result.json()
 
-    if (players.includes(registeredName) && !json.players.includes(registeredName)) {
+    if (json.started && players.includes(registeredName) && !json.players.includes(registeredName)) {
         alert('You were eliminated lmao!')
     }
 
