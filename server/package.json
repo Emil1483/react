@@ -10,7 +10,6 @@
   "author": "Emil Djupvik",
   "license": "MIT",
   "dependencies": {
-    "@vercel/ncc": "^0.33.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "helmet": "^4.6.0",
