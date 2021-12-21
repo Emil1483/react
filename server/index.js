@@ -3,7 +3,8 @@ const express = require('express')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const _ = require('underscore')
-const fs = require('fs');
+const fs = require('fs')
+var path = require('path')
 
 const app = express()
 
@@ -15,7 +16,13 @@ app.use(express.json())
 const port = process.env.PORT || 1881
 
 function loadData() {
-    return JSON.parse(fs.readFileSync('data.json'))
+    const configDirectory = path.resolve(process.cwd(), 'config');
+
+    return JSON.parse(
+        fs.readFileSync(
+            path.join(configDirectory, 'data.json')
+        )
+    )
 }
 
 let { players, reactionStart, started } = loadData()
