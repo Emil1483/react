@@ -42,6 +42,8 @@ function saveData() {
         started: started
     }
 
+    console.log('saving', data, 'to', homeUrl)
+
     axios.post(homeUrl + 'save-json', data)
         .then(_ => {
             console.log('data saved')
