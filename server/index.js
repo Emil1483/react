@@ -66,6 +66,7 @@ app.post('/register', (req, res) => {
     }
 
     players[name] = null
+    
     saveData()
 
     res.status(200).send(`registered ${name}`)
