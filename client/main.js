@@ -34,6 +34,8 @@ function updateHtml() {
 
     registeredName && reactionStart ? show(buttonDiv) : hide(buttonDiv)
 
+    chairButton.disabled = !!reactionResult
+
     if (reactionResult) {
         chairButton.innerHTML = reactionResult > 0 ? Math.round(reactionResult) : 'too early!'
         chairButton.className = reactionResult > 0 ? 'blue' : 'red'
