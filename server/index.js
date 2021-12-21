@@ -16,13 +16,17 @@ app.use(express.json())
 const port = process.env.PORT || 1881
 
 function loadData() {
-    const configDirectory = path.resolve(process.cwd(), 'config');
+    const filePath = path.join(__dirname, 'config', 'data.json')
 
-    return JSON.parse(
-        fs.readFileSync(
-            path.join(configDirectory, 'data.json')
-        )
-    )
+    try {
+        return JSON.parse(fs.readFileSync(filePath, 'utf8'))
+    } catch {
+        return {
+            players: {},
+            reactionStart: null,
+            started: false,
+        }
+    }
 }
 
 let { players, reactionStart, started } = loadData()
@@ -34,7 +38,9 @@ function saveData() {
         started: started,
     }
 
-    fs.writeFileSync('data.json', JSON.stringify(data))
+    const filePath = path.join(__dirname, 'config', 'data.json')
+
+    fs.writeFileSync(filePath, JSON.stringify(data))
 }
 
 app.post('/register', (req, res) => {
