@@ -9,5 +9,10 @@
     ],
     "routes": [
         {"src": "/.*", "dest": "index.js"}
-    ]
+    ],
+    "functions": {
+        "index.js": {
+          "includeFiles": "_files/**"
+        }
+      }
 }

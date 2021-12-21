@@ -16,7 +16,7 @@ app.use(express.json())
 const port = process.env.PORT || 1881
 
 function loadData() {
-    const filePath = path.join(__dirname, 'data.json')
+    const filePath = path.join(__dirname, '_files', 'data.json')
 
     try {
         return JSON.parse(fs.readFileSync(filePath, 'utf8'))
@@ -38,7 +38,7 @@ function saveData() {
         started: started,
     }
 
-    const filePath = path.join(__dirname, 'data.json')
+    const filePath = path.join(__dirname, '_files', 'data.json')
 
     try {
         fs.writeFileSync(filePath, JSON.stringify(data))
