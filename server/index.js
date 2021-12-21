@@ -3,8 +3,6 @@ const express = require('express')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const _ = require('underscore')
-const fs = require('fs')
-var path = require('path')
 
 const app = express()
 
@@ -15,37 +13,9 @@ app.use(express.json())
 
 const port = process.env.PORT || 1881
 
-function loadData() {
-    const filePath = path.join(__dirname, '_files', 'data.json')
-
-    try {
-        return JSON.parse(fs.readFileSync(filePath, 'utf8'))
-    } catch {
-        return {
-            players: {},
-            reactionStart: null,
-            started: false,
-        }
-    }
-}
-
-let { players, reactionStart, started } = loadData()
-
-function saveData() {
-    const data = {
-        players: players,
-        reactionStart: reactionStart,
-        started: started,
-    }
-
-    const filePath = path.join(__dirname, '_files', 'data.json')
-
-    try {
-        fs.writeFileSync(filePath, JSON.stringify(data))
-    } catch {
-        fs.appendFileSync(filePath, JSON.stringify(data))
-    }
-}
+const players = {}
+let reactionStart = null
+let started = false
 
 app.post('/register', (req, res) => {
     if (started) {
@@ -66,8 +36,6 @@ app.post('/register', (req, res) => {
     }
 
     players[name] = null
-
-    saveData()
 
     res.status(200).send(`registered ${name}`)
 })
@@ -97,7 +65,6 @@ app.post('/results', (req, res) => {
 
     if (reaction < 0) {
         delete players[name]
-        saveData()
         res.status(200).send('you have been eliminated because you clicked too early')
         return
     }
@@ -107,13 +74,10 @@ app.post('/results', (req, res) => {
     const notDonePlayers = _.values(players).filter((x) => x == null)
     if (notDonePlayers.length == 0) {
         const worstPlayer = Object.keys(players).reduce((a, b) => players[a] > players[b] ? a : b)
-        
         delete players[worstPlayer]
 
         reactionStart = null
     }
-
-    saveData()
 
     res.status(200).send('😁')
 })
@@ -141,9 +105,6 @@ app.post('/start', (_, res) => {
     }
 
     reactionStart = Date.now() + 1000 * 5 + Math.random() * 1000 * 5
-
-    saveData()
-
     res.status(200).send(reactionStart.toString())
 })
 
@@ -153,8 +114,6 @@ app.post('/clear', (_, res) => {
     for (const name in players) {
         delete players[name]
     }
-
-    saveData()
 
     res.status(200).send('game is cleared')
 })
