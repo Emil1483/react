@@ -66,7 +66,7 @@ app.post('/register', (req, res) => {
     }
 
     players[name] = null
-    
+
     saveData()
 
     res.status(200).send(`registered ${name}`)
@@ -107,6 +107,7 @@ app.post('/results', (req, res) => {
     const notDonePlayers = _.values(players).filter((x) => x == null)
     if (notDonePlayers.length == 0) {
         const worstPlayer = Object.keys(players).reduce((a, b) => players[a] > players[b] ? a : b)
+        
         delete players[worstPlayer]
 
         reactionStart = null

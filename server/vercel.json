@@ -1,18 +1,15 @@
 {
     "version": 2,
     "name": "reaction-api",
-    "builds": [
-        {
-            "src": "index.js",
-            "use": "@now/node"
-        }
-    ],
     "routes": [
-        {"src": "/.*", "dest": "index.js"}
+        {
+            "src": "/.*",
+            "dest": "index.js"
+        }
     ],
     "functions": {
         "index.js": {
-          "includeFiles": "_files/**"
+            "includeFiles": "_files/**"
         }
-      }
+    }
 }
