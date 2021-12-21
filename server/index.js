@@ -124,6 +124,7 @@ app.post('/results', (req, res) => {
 })
 
 app.get('/game', (_, res) => {
+    loadData()
     res.status(200).json(
         {
             players: Object.keys(players),
