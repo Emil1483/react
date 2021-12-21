@@ -1,6 +1,5 @@
 {
     "version": 2,
-    "name": "reaction-api",
     "routes": [
         {
             "src": "/.*",
@@ -8,7 +7,7 @@
         }
     ],
     "functions": {
-        "index.js": {
+        "api/index.js": {
             "includeFiles": "_files/**"
         }
     }
