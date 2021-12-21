@@ -3,6 +3,7 @@ const express = require('express')
 const helmet = require('helmet')
 const morgan = require('morgan')
 const _ = require('underscore')
+const axios = require('axios')
 
 const app = express()
 
@@ -12,10 +13,43 @@ app.use(cors())
 app.use(express.json())
 
 const port = process.env.PORT || 1881
+const homeUrl = process.env.URL || 'http://192.168.10.70/'
 
-const players = {}
+let players = {}
 let reactionStart = null
 let started = false
+
+function loadData() {
+    axios.get(homeUrl + 'load-json')
+        .then(res => {
+            console.log('loading data', res.data);
+
+            players = res.data.players
+            reactionStart = res.data.reactionStart
+            started = res.data.started
+        })
+        .catch(err => {
+            console.log('error loading data', err)
+        })
+}
+
+loadData()
+
+function saveData() {
+    const data = {
+        players: players,
+        reactionStart: reactionStart,
+        started: started
+    }
+
+    axios.post(homeUrl + 'save-json', data)
+        .then(_ => {
+            console.log('data saved')
+        })
+        .catch(err => {
+            console.log('error saving data', err)
+        })
+}
 
 app.post('/register', (req, res) => {
     if (started) {
@@ -36,6 +70,8 @@ app.post('/register', (req, res) => {
     }
 
     players[name] = null
+
+    saveData()
 
     res.status(200).send(`registered ${name}`)
 })
@@ -65,6 +101,7 @@ app.post('/results', (req, res) => {
 
     if (reaction < 0) {
         delete players[name]
+        saveData()
         res.status(200).send('you have been eliminated because you clicked too early')
         return
     }
@@ -78,6 +115,8 @@ app.post('/results', (req, res) => {
 
         reactionStart = null
     }
+
+    saveData()
 
     res.status(200).send('😁')
 })
@@ -105,6 +144,9 @@ app.post('/start', (_, res) => {
     }
 
     reactionStart = Date.now() + 1000 * 5 + Math.random() * 1000 * 5
+
+    saveData()
+
     res.status(200).send(reactionStart.toString())
 })
 
@@ -114,6 +156,8 @@ app.post('/clear', (_, res) => {
     for (const name in players) {
         delete players[name]
     }
+
+    saveData()
 
     res.status(200).send('game is cleared')
 })
