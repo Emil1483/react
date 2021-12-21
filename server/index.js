@@ -16,7 +16,7 @@ app.use(express.json())
 const port = process.env.PORT || 1881
 
 function loadData() {
-    const filePath = path.join(__dirname, 'config', 'data.json')
+    const filePath = path.join(__dirname, 'data.json')
 
     try {
         return JSON.parse(fs.readFileSync(filePath, 'utf8'))
@@ -38,9 +38,13 @@ function saveData() {
         started: started,
     }
 
-    const filePath = path.join(__dirname, 'config', 'data.json')
+    const filePath = path.join(__dirname, 'data.json')
 
-    fs.writeFileSync(filePath, JSON.stringify(data))
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data))
+    } catch {
+        fs.appendFileSync(filePath, JSON.stringify(data))
+    }
 }
 
 app.post('/register', (req, res) => {
