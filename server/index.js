@@ -22,8 +22,6 @@ let started = false
 function loadData() {
     axios.get(homeUrl + 'load-json')
         .then(res => {
-            console.log('loading data', res.data);
-
             players = res.data.players
             reactionStart = res.data.reactionStart
             started = res.data.started
@@ -51,6 +49,16 @@ function saveData() {
         .catch(err => {
             console.log('error saving data', err)
         })
+}
+
+function saveResult(data) {
+    axios.post(homeUrl + 'result', data)
+    .then(_ => {
+        console.log('saved result')
+    })
+    .catch(err => {
+        console.log('error saving result', err)
+    })
 }
 
 app.post('/register', (req, res) => {
@@ -116,9 +124,15 @@ app.post('/results', (req, res) => {
         delete players[worstPlayer]
 
         reactionStart = null
+
+        saveData()
+
+        res.status(200).send('😁')
+
+        return
     }
 
-    saveData()
+    saveResult(req.body)
 
     res.status(200).send('😁')
 })
